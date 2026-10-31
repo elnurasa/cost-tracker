@@ -1,0 +1,391 @@
+/* ==========================================================================
+   Pul Planim - design tokens  (v1.0, 2026-10-30)  | owner: UX/UI
+   Companion to docs/03-design-spec.md. Every contrast pair below was
+   computed (WCAG 2.x relative luminance) - see spec section 3.1.
+
+   FONT LOADING
+   Family: Onest (OFL). Verified by cmap inspection of the Google Fonts file:
+   contains a (U+0259), schwa-capital (U+018F), dotless i, dotted I, s-cedilla,
+   g-breve, c-cedilla, o/u-umlaut, full Cyrillic incl. yo, and the currency
+   signs AZN (U+20BC), TRY (U+20BA), RUB, KZT. Weights 100-900 variable,
+   tabular figures (tnum) supported.
+   (Previous prototype fonts FAIL: Instrument Sans lacks schwa + Cyrillic;
+   Bricolage Grotesque lacks schwa + Cyrillic.)
+
+   Option A (dev / quick start) - put in <head>:
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+     <link rel="stylesheet"
+       href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap">
+   Option B (REQUIRED for the offline PWA, ship this): self-host the variable
+   woff2 files for subsets latin, latin-ext, cyrillic, cyrillic-ext and
+   precache them in the service worker, then declare:
+     @font-face { font-family: "Onest"; font-weight: 100 900; font-display: swap;
+       src: url("/fonts/Onest-var-latin.woff2") format("woff2");
+       unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+         U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2212, U+2215; }
+     (+ latin-ext incl. U+0100-02BA, U+20BA, U+20BC ; + cyrillic U+0400-045F,
+      U+0490-0491, U+04B0-04B1, U+2116, U+20BD, U+20B8)
+   Never use Google Fonts' @import inside this file (blocks rendering); load
+   it from HTML. Fallback stack below keeps layout stable if the font is late.
+
+   THEMING
+   - Default: follows OS (prefers-color-scheme).
+   - Force: <html data-theme="light"> or <html data-theme="dark">.
+   - RTL: set <html dir="rtl" lang="ar">. All tokens are direction-neutral;
+     components must use logical properties (margin-inline-start, inset-inline-end,
+     padding-block, text-align:start ...). Never write left/right in components.
+   - Media queries cannot read custom properties; breakpoints are duplicated as
+     literals in the spec. --bp-* exist for JS (getComputedStyle).
+   ========================================================================== */
+
+:root {
+  color-scheme: light dark;
+
+  /* ---------- Typography primitives ---------- */
+  --font-sans: "Onest", system-ui, -apple-system, "Segoe UI", Roboto,
+               "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-numeric: "Onest", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Type scale: rem so it follows the user's browser/OS font size up to 200%.
+     Pair: size / line-height. Minimum body line-height 1.5 for Cyrillic. */
+  --text-hero:      clamp(3.25rem, 2.2rem + 5.2vw, 4.5rem); /* 52-72px: ONE per screen */
+  --text-hero-lh:   1;
+  --text-display:   2rem;      /* 32  secondary big numbers (History/Plan primary) */
+  --text-display-lh: 2.25rem;
+  --text-title-lg:  1.5rem;    /* 24 */
+  --text-title-lg-lh: 1.75rem;
+  --text-title:     1.25rem;   /* 20 */
+  --text-title-lh:  1.625rem;
+  --text-body-lg:   1.0625rem; /* 17 */
+  --text-body-lg-lh: 1.625rem;
+  --text-body:      1rem;      /* 16 */
+  --text-body-lh:   1.5rem;
+  --text-label:     0.875rem;  /* 14 */
+  --text-label-lh:  1.25rem;
+  --text-caption:   0.75rem;   /* 12 - floor, never smaller */
+  --text-caption-lh: 1rem;
+  --tracking-hero: -0.02em;
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0;
+  --tracking-caps: 0.04em;     /* only for latin/cyrillic small labels; never for tr/az-sensitive İ/ı casing */
+
+  /* ---------- Spacing (4pt base) ---------- */
+  --space-0: 0;
+  --space-1: 0.25rem;  /* 4  */
+  --space-2: 0.5rem;   /* 8  */
+  --space-3: 0.75rem;  /* 12 */
+  --space-4: 1rem;     /* 16 - page gutter on phone */
+  --space-5: 1.25rem;  /* 20 */
+  --space-6: 1.5rem;   /* 24 */
+  --space-8: 2rem;     /* 32 */
+  --space-10: 2.5rem;  /* 40 */
+  --space-12: 3rem;    /* 48 */
+  --space-16: 4rem;    /* 64 */
+  --gutter: var(--space-4);
+  --gutter-wide: var(--space-6);
+
+  /* ---------- Radius ---------- */
+  --radius-xs: 0.25rem;   /* 4  progress bar caps, tags */
+  --radius-sm: 0.5rem;    /* 8  inputs, small buttons */
+  --radius-md: 0.75rem;   /* 12 list tiles, chips (rect style) */
+  --radius-lg: 1.25rem;   /* 20 cards, groups */
+  --radius-xl: 1.75rem;   /* 28 bottom sheet top corners, hero panel */
+  --radius-full: 999px;   /* chips, FAB, segmented, keys */
+
+  /* ---------- Sizes / touch targets ---------- */
+  --target-min: 3rem;        /* 48 - every tappable thing */
+  --target-primary: 3.5rem;  /* 56 - primary buttons, FAB, list rows */
+  --target-key: 4rem;        /* 64 - number pad key height */
+  --target-gap: 0.5rem;      /* min gap between adjacent targets */
+  --icon-sm: 1.25rem;        /* 20 */
+  --icon-md: 1.5rem;         /* 24 */
+  --icon-lg: 2rem;           /* 32 */
+  --icon-stroke: 1.75;       /* stroke width on 24 grid, round caps/joins */
+  --bar-height: 0.625rem;    /* 10 progress bar */
+  --bar-height-lg: 0.875rem; /* 14 envelope detail */
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 2px;
+  --content-max: 40rem;      /* 640 single-column reading width */
+  --pane-left: 25rem;        /* 400 tablet left pane */
+  --rail-width: 5rem;        /* 80 tablet navigation rail */
+  --tabbar-height: 4rem;     /* 64 + safe area */
+
+  /* ---------- Breakpoints (JS reference only, mirror literally in @media) ---------- */
+  --bp-compact: 0;        /* phone portrait            : 0   - 599  */
+  --bp-medium: 600px;     /* large phone / small tablet: 600 - 904  single pane, wider */
+  --bp-expanded: 905px;   /* tablet                    : 905 - 1239 two-pane + rail */
+  --bp-large: 1240px;     /* desktop / tablet landscape: 1240+      two-pane, max width 1200 */
+
+  /* ---------- Safe areas (standalone PWA, notches, gesture bars) ---------- */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-inline-start: env(safe-area-inset-left, 0px); /* browsers expose physical; swap in RTL via JS if needed */
+  --safe-inline-end: env(safe-area-inset-right, 0px);
+
+  /* ---------- Motion ---------- */
+  --dur-instant: 90ms;    /* press feedback */
+  --dur-fast: 160ms;      /* chips, toggles, fades */
+  --dur-base: 240ms;      /* sheets, row changes */
+  --dur-slow: 360ms;      /* screen transitions */
+  --dur-calm: 600ms;      /* progress bar fill, delight moments */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);   /* things entering */
+  --ease-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);   /* things leaving */
+  --ease-settle: cubic-bezier(0.34, 1.2, 0.64, 1);      /* single gentle overshoot, delight only */
+
+  /* ---------- Z-index layers ---------- */
+  --z-base: 0;
+  --z-sticky: 10;     /* sticky headers */
+  --z-nav: 20;        /* tab bar / rail */
+  --z-fab: 30;
+  --z-scrim: 40;
+  --z-sheet: 50;
+  --z-dialog: 60;
+  --z-toast: 70;
+  --z-banner: 80;     /* offline/system banner */
+  --z-lock: 100;      /* app lock overlay */
+
+  /* ======================================================================
+     COLOR - LIGHT (default)
+     Palette name: "Liman" (harbor): cool mist neutrals, deep teal brand,
+     saffron for pocket money. "Over plan" is rose, not red.
+     ====================================================================== */
+  --color-bg: #F2F5F3;               /* app background (mist) */
+  --color-surface: #FFFFFF;          /* cards, sheets */
+  --color-surface-sunken: #E8EEEB;   /* tracks, inputs, number display well */
+  --color-surface-hover: #F7FAF8;
+  --color-border: #D5DEDA;           /* hairlines (decorative) */
+  --color-border-strong: #7E908B;    /* input outlines, bar tracks (3.36:1 on white) */
+
+  --color-text: #12201D;             /* 16.8:1 on surface */
+  --color-text-muted: #4A5B57;       /* 7.18:1 on surface */
+  --color-text-subtle: #5B6C68;      /* 5.54:1 on surface / 5.05:1 on bg */
+  --color-text-on-brand: #FFFFFF;    /* 6.36:1 on brand */
+  --color-text-disabled: #8A9A96;    /* exempt from contrast; paired with aria-disabled + reduced opacity */
+
+  --color-brand: #0F6B63;            /* 6.36:1 on white */
+  --color-brand-strong: #0A524C;     /* pressed */
+  --color-brand-soft: #D8EDE9;       /* tinted fills; brand text on it 5.21:1 */
+  --color-link: #0F6B63;
+
+  /* Hero panel (Today) */
+  --color-hero-bg: #0F6B63;
+  --color-hero-text: #FFFFFF;
+  --color-hero-text-muted: #D5EDE9;  /* 5.18:1 on hero-bg */
+  --color-hero-line: rgba(255, 255, 255, 0.35); /* horizon line, day dots */
+
+  /* Pocket money ("Mənim payım") */
+  --color-pocket: #F0B84A;           /* fill; ink text on it 9.33:1 */
+  --color-pocket-text: #7A5200;      /* 6.92:1 on white */
+  --color-pocket-soft: #FBEFD0;
+
+  /* Semantic status. Never colour alone: each has an icon + word + bar pattern. */
+  --color-ok: #0F6B63;               /* on plan */
+  --color-ok-fill: #0F6B63;
+  --color-ok-soft: #D8EDE9;
+  --color-watch: #8A5A00;            /* ahead of pace (text 5.93:1) */
+  --color-watch-fill: #E5A12B;
+  --color-watch-soft: #FBEBC8;
+  --color-over: #8A4B2E;             /* short (E-13: warm brown, not alarm rose; 6.72:1 on surface) */
+  --color-over-fill: #B8714A;        /* bar fill, graphics only */
+  --color-over-soft: #F5E6DC;
+  --color-info: #2F5D8C;
+  --color-info-soft: #E1EBF6;
+
+  /* Bars */
+  --color-bar-track: #DCE5E1;
+  --color-pace-marker: #12201D;      /* "where today is" tick */
+
+  /* Overlays */
+  --color-scrim: rgba(10, 22, 20, 0.48);
+  --color-focus-ring: #0F6B63;       /* + 2px white offset ring => visible on every surface */
+  --color-focus-ring-inner: #FFFFFF;
+
+  /* Elevation (light): tonal first, shadow only for floating layers */
+  --shadow-0: none;
+  --shadow-1: 0 1px 2px rgba(18, 32, 29, 0.08);
+  --shadow-2: 0 4px 14px rgba(18, 32, 29, 0.10), 0 1px 3px rgba(18, 32, 29, 0.08);
+  --shadow-3: 0 12px 32px rgba(18, 32, 29, 0.16), 0 2px 6px rgba(18, 32, 29, 0.10);
+  --shadow-sheet: 0 -8px 32px rgba(18, 32, 29, 0.16);
+}
+
+/* ==========================================================================
+   COLOR - DARK. Declared twice on purpose (CSS cannot share a block between
+   a media query and an attribute selector). Keep the two blocks identical.
+   Dark is deep green-black, not pure black; text 15.8:1.
+   ========================================================================== */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #0D1513;
+    --color-surface: #152120;
+    --color-surface-sunken: #0A1110;
+    --color-surface-hover: #1A2927;
+    --color-border: #243633;
+    --color-border-strong: #5E7570;      /* 3.35:1 on surface */
+
+    --color-text: #E6EFEC;
+    --color-text-muted: #A9BDB8;         /* 8.39:1 */
+    --color-text-subtle: #8FA39E;        /* 6.22:1 */
+    --color-text-on-brand: #04211D;      /* 8.49:1 on brand */
+    --color-text-disabled: #5E7570;
+
+    --color-brand: #5CC9BC;              /* 8.29:1 on surface */
+    --color-brand-strong: #8BE0D5;
+    --color-brand-soft: #14332F;         /* brand on it 6.82:1 */
+    --color-link: #5CC9BC;
+
+    --color-hero-bg: #12302C;
+    --color-hero-text: #E6F7F4;
+    --color-hero-text-muted: #A9D6CF;
+    --color-hero-line: rgba(92, 201, 188, 0.40);
+
+    --color-pocket: #F2C25E;
+    --color-pocket-text: #F2C25E;        /* 9.96:1 */
+    --color-pocket-soft: #3A2E12;
+
+    --color-ok: #5CC9BC;
+    --color-ok-fill: #5CC9BC;
+    --color-ok-soft: #14332F;
+    --color-watch: #F0B94D;              /* 9.25:1 */
+    --color-watch-fill: #F0B94D;
+    --color-watch-soft: #3A2E12;
+    --color-over: #E8A787;               /* warm, 8.1:1 on surface */
+    --color-over-fill: #D98E6A;
+    --color-over-soft: #3A2A20;
+    --color-info: #8DB8E8;
+    --color-info-soft: #172A40;
+
+    --color-bar-track: #243633;
+    --color-pace-marker: #E6EFEC;
+
+    --color-scrim: rgba(0, 0, 0, 0.62);
+    --color-focus-ring: #8BE0D5;
+    --color-focus-ring-inner: #0D1513;
+
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.40);
+    --shadow-2: 0 4px 14px rgba(0, 0, 0, 0.50);
+    --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.60);
+    --shadow-sheet: 0 -8px 32px rgba(0, 0, 0, 0.60);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #0D1513;
+  --color-surface: #152120;
+  --color-surface-sunken: #0A1110;
+  --color-surface-hover: #1A2927;
+  --color-border: #243633;
+  --color-border-strong: #5E7570;
+
+  --color-text: #E6EFEC;
+  --color-text-muted: #A9BDB8;
+  --color-text-subtle: #8FA39E;
+  --color-text-on-brand: #04211D;
+  --color-text-disabled: #5E7570;
+
+  --color-brand: #5CC9BC;
+  --color-brand-strong: #8BE0D5;
+  --color-brand-soft: #14332F;
+  --color-link: #5CC9BC;
+
+  --color-hero-bg: #12302C;
+  --color-hero-text: #E6F7F4;
+  --color-hero-text-muted: #A9D6CF;
+  --color-hero-line: rgba(92, 201, 188, 0.40);
+
+  --color-pocket: #F2C25E;
+  --color-pocket-text: #F2C25E;
+  --color-pocket-soft: #3A2E12;
+
+  --color-ok: #5CC9BC;
+  --color-ok-fill: #5CC9BC;
+  --color-ok-soft: #14332F;
+  --color-watch: #F0B94D;
+  --color-watch-fill: #F0B94D;
+  --color-watch-soft: #3A2E12;
+  --color-over: #E8A787;
+  --color-over-fill: #D98E6A;
+  --color-over-soft: #3A2A20;
+  --color-info: #8DB8E8;
+  --color-info-soft: #172A40;
+
+  --color-bar-track: #243633;
+  --color-pace-marker: #E6EFEC;
+
+  --color-scrim: rgba(0, 0, 0, 0.62);
+  --color-focus-ring: #8BE0D5;
+  --color-focus-ring-inner: #0D1513;
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.40);
+  --shadow-2: 0 4px 14px rgba(0, 0, 0, 0.50);
+  --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.60);
+  --shadow-sheet: 0 -8px 32px rgba(0, 0, 0, 0.60);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* ==========================================================================
+   Reduced motion: collapse durations; components must also drop transforms
+   (see spec 7.4). Do not remove state changes, only their animation.
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-instant: 0.01ms;
+    --dur-fast: 0.01ms;
+    --dur-base: 0.01ms;
+    --dur-slow: 0.01ms;
+    --dur-calm: 0.01ms;
+  }
+}
+:root[data-motion="reduce"] {
+  --dur-instant: 0.01ms;
+  --dur-fast: 0.01ms;
+  --dur-base: 0.01ms;
+  --dur-slow: 0.01ms;
+  --dur-calm: 0.01ms;
+}
+
+/* Increased contrast preference: strengthen hairlines and muted text. */
+@media (prefers-contrast: more) {
+  :root {
+    --color-border: var(--color-border-strong);
+    --color-text-muted: var(--color-text);
+    --color-text-subtle: var(--color-text);
+  }
+}
+
+/* ==========================================================================
+   Base helpers (tokens-adjacent; not a reset)
+   ========================================================================== */
+html {
+  font-family: var(--font-sans);
+  font-size: 100%;              /* never px: respects user font-size setting */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* Numerals: tabular + lining in lists/amount columns; hero may be proportional */
+.num, [data-amount] {
+  font-family: var(--font-numeric);
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+  unicode-bidi: isolate;        /* keep amounts LTR-stable inside RTL text */
+  direction: ltr;
+}
+
+/* Keyboard focus: dual ring, visible on any surface (WCAG 2.4.11/2.4.13) */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  box-shadow: 0 0 0 calc(var(--focus-ring-offset) + 1px) var(--color-focus-ring-inner);
+}

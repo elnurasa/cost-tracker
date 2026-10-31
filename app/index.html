@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0F6B63" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#12302C" media="(prefers-color-scheme: dark)" />
+    <meta name="description" content="Sakin" />
+    <meta name="apple-mobile-web-app-title" content="Sakin" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icon-maskable-512.png" /> <!-- full-bleed square: iOS rounds it itself, transparent corners would turn black -->
+    <title>Sakin</title>
+    <style>
+      /* critical first-paint styles: right background in both themes, calm skeleton until the app mounts (no flash, no layout shift) */
+      html { background: #F2F5F3; color-scheme: light dark; }
+      body { margin: 0; background: #F2F5F3; }
+      .boot-hero { background: #0F6B63; border-radius: 0 0 28px 28px; height: 288px; padding: 56px 16px 0; }
+      .boot-bar { height: 16px; border-radius: 8px; background: rgba(255,255,255,.18); width: 55%; margin-bottom: 16px; }
+      .boot-num { height: 56px; border-radius: 12px; background: rgba(255,255,255,.18); width: 40%; margin-bottom: 20px; }
+      .boot-card { margin: 16px; height: 96px; border-radius: 20px; background: #E7EDEA; }
+      @media (prefers-color-scheme: dark) {
+        html, body { background: #0D1513; }
+        .boot-hero { background: #12302C; }
+        .boot-card { background: #17211F; }
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .boot-bar, .boot-num, .boot-card { animation: boot 1.6s ease-in-out infinite; }
+        @keyframes boot { 50% { opacity: .55; } }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"><div aria-hidden="true"><div class="boot-hero"><div class="boot-bar"></div><div class="boot-num"></div><div class="boot-bar" style="width:70%"></div></div><div class="boot-card"></div><div class="boot-card"></div></div></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
