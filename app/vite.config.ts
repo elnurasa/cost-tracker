@@ -33,6 +33,8 @@ const cspPlugin = (): Plugin => ({
 });
 
 export default defineConfig({
+  // sub-path hosting (GitHub Pages project site) sets BASE_PATH, e.g. "/cost-tracker/"; local and root hosts keep "/"
+  base: process.env.BASE_PATH ?? '/',
   plugins: [
     react(),
     cspPlugin(),
@@ -50,8 +52,8 @@ export default defineConfig({
         // brand-neutral on purpose: a static manifest cannot follow the in-app language. The page title and meta tags are localized at runtime
         name: 'Sakin',
         short_name: 'Sakin',
-        start_url: '/',
-        scope: '/',
+        start_url: './',
+        scope: './',
         display: 'standalone',
         orientation: 'any',
         background_color: '#F2F5F3',
